@@ -1,0 +1,367 @@
+import math
+import random
+from mingus.core import chords
+from midiutil import MIDIFile
+
+class Music:
+    
+    def __init__(self, keyInp, scaleInp, cNum, keyAlpha, chordList): # Initializng the methods and variables within the class
+        self.keyAlpha = keyAlpha
+        self.keyInp = keyInp
+        self.cNum = cNum
+        self.scaleInp = scaleInp
+        self.chordList = chordList
+        
+    def getNotes(self): # Creating lists for each available key with every note in that key
+        self.keyAlpha = []
+        if self.scaleInp == "Maj": # Major keys
+            if self.keyInp == "Ab":
+                self.keyAlpha = ["Ab", "Bb", "C", "Db", "Eb", "F", "G"]
+            elif self.keyInp == "A":
+                self.keyAlpha = ["A", "B", "C#", "D", "E", "F#", "G#"]
+            elif self.keyInp == "Bb":
+                self.keyAlpha = ["Bb", "C", "D", "Eb", "F", "G", "A"]
+            elif self.keyInp == "B":
+                self.keyAlpha = ["B", "C#", "D#", "E", "F#", "G#", "A#"]
+            elif self.keyInp == "C":
+                self.keyAlpha = ["C", "D", "E", "F", "G", "A", "B"]
+            elif self.keyInp == "C#":
+                self.keyAlpha = ["C#", "D#", "E#", "F#", "G#", "A#", "B#"]
+            elif self.keyInp == "Db":
+                self.keyAlpha = ["Db", "Eb", "F", "Gb", "Ab", "Bb", "C"]
+            elif self.keyInp == "D":
+                self.keyAlpha = ["D", "E", "F#", "G", "A", "B", "C#"]
+            elif self.keyInp == "Eb":
+                self.keyAlpha = ["Eb", "F", "G", "Ab", "Bb", "C", "D"]
+            elif self.keyInp == "E":
+                self.keyAlpha = ["E", "F#", "G#", "A", "B", "C#", "D#"]
+            elif self.keyInp == "F":
+                self.keyAlpha = ["F", "G", "A", "Bb", "C", "D", "E"]
+            elif self.keyInp == "F#":
+                self.keyAlpha = ["F#", "G#", "A#", "B", "C#", "D#", "E#"]
+            elif self.keyInp == "Gb":
+                self.keyAlpha = ["Gb", "Ab", "Bb", "Cb", "Db", "Eb", "F"]
+            elif self.keyInp == "G":
+                self.keyAlpha = ["G", "A", "B", "C", "D", "E", "F#"]
+        elif self.scaleInp == "min": # minor keys
+            if self.keyInp == "Ab":
+                self.keyAlpha = ["Ab", "Bb", "Cb", "Db", "Eb", "Fb", "G"]
+            elif self.keyInp == "A":
+                self.keyAlpha = ["A", "B", "C", "D", "E", "F", "G#"]
+            elif self.keyInp == "Bb":
+                self.keyAlpha = ["Bb", "C", "Db", "Eb", "F", "Gb", "A"]
+            elif self.keyInp == "B":
+                self.keyAlpha = ["B", "C#", "D", "E", "F#", "G", "A#"]
+            elif self.keyInp == "C":
+                self.keyAlpha = ["C", "D", "Eb", "F", "G", "Ab", "B"]
+            elif self.keyInp == "C#":
+                self.keyAlpha = ["C#", "D#", "E", "F#", "G#", "A", "B#"]
+            elif self.keyInp == "Db":
+                self.keyAlpha = ["Db", "Eb", "Fb", "Gb", "Ab", "Bbb", "C"]
+            elif self.keyInp == "D":
+                self.keyAlpha = ["D", "E", "F", "G", "A", "Bb", "C#"]
+            elif self.keyInp == "Eb":
+                self.keyAlpha = ["Eb", "F", "Gb", "Ab", "Bb", "Cb", "D"]
+            elif self.keyInp == "E":
+                self.keyAlpha = ["E", "F#", "G", "A", "B", "C", "D#"]
+            elif self.keyInp == "F":
+                self.keyAlpha = ["F", "G", "Ab", "Bb", "C", "Db", "E"]
+            elif self.keyInp == "F#":
+                self.keyAlpha = ["F#", "G#", "A", "B", "C#", "D", "E#"]
+            elif self.keyInp == "Gb":
+                self.keyAlpha = ["Gb", "Ab", "Bbb", "Cb", "Db", "Ebb", "F"]
+            elif self.keyInp == "G":
+                self.keyAlpha = ["G", "A", "Bb", "C", "D", "Eb", "F#"]
+        return self.keyAlpha
+    
+    def getChords(self): # Logic for creating the chord structure
+        
+        self.chordList = []
+        
+        if self.scaleInp == "Maj": # For Major Keys
+            self.chordList.append(self.keyAlpha[0] + " maj") # Making the first chord the tonic
+            for i in range(1, self.cNum-2):
+                randomChance = random.randint(0, 100)
+                dom7 = False
+                randomv7 = random.randint(0, 100)
+                if randomv7 <= 33: #Allowing chance for a V7
+                    dom7 = True
+                         
+                if self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 6:  # Resolving leading tone to tonic
+                    self.chordList.append(self.keyAlpha[0] + " maj")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) in [1, 3] and self.keyAlpha.index(self.chordList[i - 2].split()[0]) == 0 and randomChance >= 50:  # 50 % chance for Leading 2nd and 4th to 5th if after 1 chord
+                    self.chordList.append(self.keyAlpha[4] + " maj")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 3 and randomChance >= 35: # Giving the 4 chord a 35% chance to resolve to 1 chord
+                    self.chordList.append(self.keyAlpha[0] + " maj")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 2: # Giving the 3 chord a 30% chance to go to the 4 chord 
+                    random4 = random.randint(0, 100)
+                    if random4 <= 30:
+                        self.chordList.append(self.keyAlpha[3] + " maj") # Making 3 chord go to 4
+                    else:
+                        random2or6 = random.randint(0, 1)
+                        if random2or6 == 0:
+                            self.chordList.append(self.keyAlpha[1] + " min") # Making 3 go to 2
+                        else:
+                            self.chordList.append(self.keyAlpha[5] + " min") # Making 3 go to 6
+                            
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 5: # Giving 6 chord a 30% chance to go to 4 vs 2, 3, or 5
+                    random4 = random.randint(0, 100)
+                    if random4 <= 30:
+                        self.chordList.append(self.keyAlpha[3] +  "maj") # Making 6 chord go to 4
+                    else:
+                        random2or3or5 = random.randint(0, 2)
+                        if random2or3or5 == 0:
+                            self.chordList.append(self.keyAlpha[1] + " min") # 6 goes to 2
+                        elif random2or3or5 == 1:
+                            self.chordList.append(self.keyAlpha[2] + " min") # 6 goes to 3
+                        else:
+                            self.chordList.append(self.keyAlpha[4] + " maj") # 6 goes to 5
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 4:  # Checking if last chord was V/V7
+                    if dom7:
+                        self.chordList.pop()
+                        self.chordList.append(self.keyAlpha[4] + " dom7") # Changes previous V to V7
+                        self.chordList.append(self.keyAlpha[0] + " maj") # V7 is triggered, making it always go to 1 chord
+                    else:
+                        if randomChance <= 50:
+                            self.chordList.append(self.keyAlpha[0] + " maj") # 50% chance for V to go to 1 chord
+                        else:
+                            random4or6 = random.randint(0, 2) # Randomly generate the V moving to a 4 or 6 chord 
+                            if random4or6 == 0:
+                                self.chordList.append(self.keyAlpha[3] + " maj") # Move V to 4 chord
+                            elif random4or6 == 1:
+                                self.chordList.append(self.keyAlpha[5] + " min") # Move V to 6 chord
+                            else:
+                                random2or3 = random.randint(0, 2) # Randomly generate the V moving to a 2 or 3 chord
+                                if random2or3 == 0:
+                                    self.chordList.append(self.keyAlpha[1] + " min") # Move V to 2 chord
+                                elif random2or3 == 1:
+                                    self.chordList.append(self.keyAlpha[2] + " min") # Move V to 3 chord
+                                else:
+                                    self.chordList.append(self.keyAlpha[6] + " dim") # Rarely move V to 7 chord
+                else: # Everything in between
+                    randomScaleDegree = random.randint(0, 6)
+                    valid_chord = False
+                    while not valid_chord:
+                        if randomScaleDegree == 6:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " dim") # Making 7 chords diminished
+                            valid_chord = True
+                        elif randomScaleDegree == 3 or randomScaleDegree == 4 or randomScaleDegree == 0:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " maj")  # Making 1, 4, and 5 chords Major
+                            valid_chord = True
+                        else:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " min")  # Making 2, 3, and 6 chords minor
+                            valid_chord = True
+
+                        if self.chordList[i] == self.chordList[i - 1] == self.chordList[i - 2]:  # Eliminating the repetition of three chords
+                            self.chordList.pop()
+                            randomScaleDegree = random.randint(0, 6)
+                            valid_chord = False
+
+            # Ensuring a proper resolution at the end
+            #-----------------------------------------               
+            if self.chordList[len(self.chordList)-1] == self.keyAlpha[4]:
+                self.chordList.pop()
+                random2or4 = random.randint(0,1) # If the loop ends on a 5 chord, change it to either a 2 or 4 chord
+                if random2or4 == 0:
+                    self.chordList.append(self.keyAlpha[1] + " min")
+                elif random2or4 == 1:
+                    self.chordList.append(self.keyAlpha[3] + " maj")
+                    
+            random5 = random.randint(0, 1)
+            if random5 == 0:
+                self.chordList.append(self.keyAlpha[4] + " maj") # 50% chance for V chord to be second to last chord
+            else:
+                random4or7 = random.randint(0,100)
+                if random4or7 <= 65: 
+                    self.chordList.append(self.keyAlpha[3] + " maj") # 65% chance if not the V chord for it to be the 4 chord
+                else:
+                    self.chordList.append(self.keyAlpha[6] + " dim") # 35% chance if not the V chord for it to be the 7 chord
+            randomv7 = random.randint(0, 10)
+            if randomv7 <= 2 and self.chordList[i - 1]: # 20% chance for the V chord to be a V7
+                self.chordList.pop()
+                self.chordList.append(self.keyAlpha[4] + " dom7")
+
+            self.chordList.append(self.keyAlpha[0] + " maj") # Making the Last chord the tonic (1)
+            
+        #-----------------------------------------------------    
+        if self.scaleInp == "min": # For minor keys
+            self.chordList.append(self.keyAlpha[0] + " min") # Making the first chord the tonic
+            for i in range(1, self.cNum-2):
+                randomChance = random.randint(0, 100)
+                dom7 = False
+                randomv7 = random.randint(0, 100)
+                if randomv7 <= 33: #Allowing chance for a V7
+                    dom7 = True
+                                          
+                if self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 6:  # Resolving leading tone to tonic
+                    self.chordList.append(self.keyAlpha[0] + " min")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) in [1, 3] and self.keyAlpha.index(self.chordList[i - 2].split()[0]) == 0 and randomChance >= 50:  # 50 % chance for Leading 2nd and 4th to 5th if after 1 chord
+                    self.chordList.append(self.keyAlpha[4] + " maj")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 3 and randomChance >= 35: # Giving the 4 chord a 35% chance to resolve to 1 chord
+                    self.chordList.append(self.keyAlpha[0] + " min")
+                    
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 2: # Giving the 3 chord a 30% chance to go to the 4 chord 
+                    random4 = random.randint(0, 100)
+                    if random4 <= 30:
+                        self.chordList.append(self.keyAlpha[3] + " min") # Making 3 chord go to 4
+                    else:
+                        random2or6 = random.randint(0, 1)
+                        if random2or6 == 0:
+                            self.chordList.append(self.keyAlpha[1] + " dim") # Making 3 go to 2
+                        else:
+                            self.chordList.append(self.keyAlpha[5] + " min") # Making 3 go to 6
+                            
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 5: # Giving 6 chord a 30% chance to go to 4 vs 2, 3, or 5
+                    random4 = random.randint(0, 100)
+                    if random4 <= 30:
+                        self.chordList.append(self.keyAlpha[3] + " min") # Making 6 chord go to 4
+                    else:
+                        random2or3or5 = random.randint(0, 2)
+                        if random2or3or5 == 0:
+                            self.chordList.append(self.keyAlpha[1] + " dim") # 6 goes to 2
+                        elif random2or3or5 == 1:
+                            self.chordList.append(self.keyAlpha[2] + " maj") # 6 goes to 3
+                        else:
+                            self.chordList.append(self.keyAlpha[4] + " maj") # 6 goes to 5
+                elif self.keyAlpha.index(self.chordList[i - 1].split()[0]) == 4:  # Checking if last chord was V/V7
+                    if dom7:
+                        self.chordList.pop()
+                        self.chordList.append(self.keyAlpha[4] + " dom7") # Changes previous V to V7
+                        self.chordList.append(self.keyAlpha[0] + " min") # V7 is triggered, making it always go to 1 chord
+                    else:
+                        if randomChance <= 50:
+                            self.chordList.append(self.keyAlpha[0] + " min") # 50% chance for V to go to 1 chord
+                        else:
+                            random4or6 = random.randint(0, 2) # Randomly generate the V moving to a 4 or 6 chord 
+                            if random4or6 == 0:
+                                self.chordList.append(self.keyAlpha[3] + " min") # Move V to 4 chord
+                            elif random4or6 == 1:
+                                self.chordList.append(self.keyAlpha[5] + " min") # Move V to 6 chord
+                            else:
+                                random2or3 = random.randint(0, 2) # Randomly generate the V moving to a 2 or 3 chord
+                                if random2or3 == 0:
+                                    self.chordList.append(self.keyAlpha[1] + " dim") # Move V to 2 chord
+                                elif random2or3 == 1:
+                                    self.chordList.append(self.keyAlpha[2] + " maj") # Move V to 3 chord
+                                else:
+                                    self.chordList.append(self.keyAlpha[6] + " dim") # Rarely move V to 7 chord
+                else: # Everything in between
+                    randomScaleDegree = random.randint(0, 6)
+                    valid_chord = False
+                    while not valid_chord:
+                        if randomScaleDegree == 1 or randomScaleDegree == 6:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " dim") # Making 2 and 7 chords diminished
+                            valid_chord = True
+                        elif randomScaleDegree == 2 or randomScaleDegree == 4 or randomScaleDegree == 5:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " maj")  # Making 3, 5, and 6 chords Major
+                            valid_chord = True
+                        else:
+                            self.chordList.append(self.keyAlpha[randomScaleDegree] + " min")  # Making 1 and 4 chords minor
+                            valid_chord = True
+
+                        if self.chordList[i] == self.chordList[i - 1] == self.chordList[i - 2]:  # Eliminating the repetition of three chords
+                            self.chordList.pop()
+                            randomScaleDegree = random.randint(0, 6)
+                            valid_chord = False
+
+            # Ensuring a proper resolution at the end
+            #-----------------------------------------               
+            if self.chordList[len(self.chordList)-1] == self.keyAlpha[4]:
+                self.chordList.pop()
+                random2or4 = random.randint(0,1) # If the loop ends on a 5 chord, change it to either a 2 or 4 chord
+                if random2or4 == 0:
+                    self.chordList.append(self.keyAlpha[1] + " dim")
+                elif random2or4 == 1:
+                    self.chordList.append(self.keyAlpha[3] + " min")
+                    
+            random5 = random.randint(0, 1)
+            if random5 == 0:
+                self.chordList.append(self.keyAlpha[4] + " maj") # 50% chance for V chord to be second to last chord
+            else:
+                random4or7 = random.randint(0,100)
+                if random4or7 <= 65: 
+                    self.chordList.append(self.keyAlpha[3] + " min") # 65% chance if not the V chord for it to be the 4 chord
+                else:
+                    self.chordList.append(self.keyAlpha[6] + " dim") # 35% chance if not the V chord for it to be the 7 chord
+            randomv7 = random.randint(0, 10)
+            if randomv7 <= 2 and self.chordList[i - 1]: # 20% chance for the V chord to be a V7
+                self.chordList.pop()
+                self.chordList.append(self.keyAlpha[4] + " dom7")
+
+            self.chordList.append(self.keyAlpha[0] + " min") # Making the Last chord the tonic (1)
+            
+        return self.chordList
+                
+                
+#Main
+print("Welcome to my random chord progression generator!")
+
+valid_key = False
+while not valid_key: # Checks to make sure the user entered a valid key and enough chords
+    keyInp = str(input("Enter the key you want to create a chord structure for (Ex: A, G#, Bb): "))
+    scaleInp = str(input("Major or minor? (Type Maj or min): "))
+    cNum = int(input("How many chords would you like? (min 4) "))
+    music_instance = Music(keyInp, scaleInp, cNum, [], [])
+    if keyInp in ["Ab", "A", "Bb", "B", "C", "C#", "Db", "D", "Eb", "E", "F", "F#", "Gb", "G"] and scaleInp in ["Maj", "min"] and cNum >= 4:
+        valid_key = True
+    else:
+        print("Not a standard key or scale, or not enough chords. Try again.")
+        
+chordPr = Music(keyInp, scaleInp, cNum, [], []) # Creating an instance of the Music class
+
+keyAlpha = chordPr.getNotes() # Calls the getNotes function to grab the correct list of notes
+
+newChords = chordPr.getChords()
+print("\n")
+print("Notes in " , keyInp, scaleInp, ":" ,chordPr.keyAlpha)
+print("\n")
+print("Chord Progression:" , end = "\n")
+print(newChords)
+print("\n")
+
+cleaned_chords = [chord.replace(" ", "") for chord in newChords] #Removing spaces from chords and quality
+array_of_notes = [] # Creating new array of empty notes per chord
+for chord in cleaned_chords:
+    array_of_notes.append(chords.from_shorthand(chord)) # Mingus library turns chords into individual notes
+
+print("Notes for each chord:", end = "\n")
+print(array_of_notes)
+
+# Function to convert note names to MIDI note numbers
+def note_name_to_number(note):
+    notes_map = {
+        "C": 60, "C#": 61, "Dbb": 60, "Db": 61, "D": 62, "D#": 63, "Eb": 63, "E": 64, "Fb": 64, "Ebb": 63, "F": 65,
+        "F#": 66, "Gb": 66, "G": 67, "G#": 68, "Ab": 68, "Abb": 67, "A": 69, "A#": 70, "Bb": 70, "B": 71, "B#": 60, "Cb": 71, "Bbb": 69
+    }
+    
+    # Split the note by its octave (assuming the note ends with the octave number)
+    note_name = note[:-1] if note[-1].isdigit() else note
+
+    return notes_map[note_name]
+
+# Create a MIDI file
+midi_file = MIDIFile(1)
+track = 0
+time = 0
+tempo = 60  # Adjust tempo as needed
+duration = 1  # Duration for each chord (in beats)
+volume = 100
+
+midi_file.addTempo(track, time, tempo)
+
+# Generate MIDI notes for each chord
+for i, chord in enumerate(cleaned_chords):
+    for note in array_of_notes[i]:
+        midi_note = note_name_to_number(note)
+        midi_file.addNote(track, 0, midi_note, time, duration, volume)
+
+    time += duration  # Move to the next chord
+
+# Save the MIDI file
+with open("chord_progression.mid", "wb") as file:
+    midi_file.writeFile(file)
